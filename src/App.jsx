@@ -61,13 +61,24 @@ export default function App() {
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <Box>
+        {/* Rather than using children, we can also use explicit props to achieve the same goal of component composition */}
+        <Box element={<MovieList movies={movies} />} />
+        <Box
+          element={
+            // This is a JSX block so we will need fragments as opposed to below with children where it's straight JS
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchedMovieList watched={watched} />
+            </>
+          }
+        />
+        {/*<Box>
           <MovieList movies={movies} />
         </Box>
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMovieList watched={watched} />
-        </Box>
+        </Box>*/}
       </Main>
     </>
   );
@@ -75,7 +86,6 @@ export default function App() {
 
 // example of a structural component
 function NavBar({ children }) {
-  console.log(children);
   return (
     <nav className="nav-bar">
       <Logo />
@@ -120,17 +130,15 @@ function Main({ children }) {
   return <main className="main">{children}</main>;
 }
 
-function Box({ children }) {
+function Box({ element }) {
   const [isOpen, setIsOpen] = useState(true);
-
-  console.log(children);
 
   return (
     <div className="box">
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? "–" : "+"}
       </button>
-      {isOpen && children}
+      {isOpen && element}
     </div>
   );
 }
