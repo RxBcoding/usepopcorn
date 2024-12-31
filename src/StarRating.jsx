@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 const containerStyle = {
   display: "flex",
@@ -8,6 +9,19 @@ const containerStyle = {
 
 const starContainerStyle = {
   display: "flex",
+};
+
+/* Prop types is used to type check props being passed into a component
+can use .isRequired but since I have default values it's not necessary*/
+StarRating.propTypes = {
+  maxRating: PropTypes.number,
+  color: PropTypes.string,
+  size: PropTypes.number,
+  className: PropTypes.string,
+  messages: PropTypes.arrayOf(PropTypes.string),
+  defaultRating: PropTypes.number,
+  /*  */
+  onSetRating: PropTypes.func,
 };
 
 /* default props: If we are expecting a prop but the parent doesn't pass it through, we can set a default value for that prop*/
