@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -50,43 +50,9 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "d826a939";
-
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
-  const query = "interstellar";
-
-  /* use effect is used to register an effect, it contains the side effect we want to register and let's us
-  run this code not as the component gets rendered but after it has already been painted onto the screen*/
-  /*useEffect(function () {
-    fetch(`http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=interstellar`)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.Search));
-  }, []);*/
-
-  useEffect(function () {
-    async function fetchMovies() {
-      const res = await fetch(
-        `http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      // at this point the state will still be stale
-      /* console.log(movies); */
-    }
-
-    fetchMovies();
-  }, []);
-
-  /* we never want to set state inside of a components render logic, this is an infinite loop of state setting
-  where the component will keep re-rendering
-  fetch(`http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=interstellar`)
-    .then((res) => res.json())
-    .then((data) => setMovies(data.Search)); 
-    
-  infinite loop
-  setWatched([])*/
+  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
 
   return (
     <>
@@ -107,6 +73,7 @@ export default function App() {
   );
 }
 
+// example of a structural component
 function NavBar({ children }) {
   return (
     <nav className="nav-bar">
@@ -164,6 +131,32 @@ function Box({ children }) {
     </div>
   );
 }
+/*
+what used to be ListBox is now just called Box, instead of using 2 different Boxes for the List and Watched boxes,
+with component composition Box can become a resuable component that can handle both use cases
+
+function WatchedBox() {
+  const [watched, setWatched] = useState(tempWatchedData);
+  const [isOpen2, setIsOpen2] = useState(true);
+
+  return (
+    <div className="box">
+      <button
+        className="btn-toggle"
+        onClick={() => setIsOpen2((open) => !open)}
+      >
+        {isOpen2 ? "–" : "+"}
+      </button>
+      {isOpen2 && (
+        <>
+          <WatchedSummary watched={watched} />
+          <WatchedMovieList watched={watched} />
+        </>
+      )}
+    </div>
+  );
+}
+*/
 
 function MovieList({ movies }) {
   return (
@@ -175,6 +168,7 @@ function MovieList({ movies }) {
   );
 }
 
+// example of a stateless component
 function Movie({ movie }) {
   return (
     <li>
