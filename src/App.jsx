@@ -55,7 +55,9 @@ const KEY = "d826a939";
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
-  const query = "interstellar";
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const query = "gdfgs ";
 
   /* use effect is used to register an effect, it contains the side effect we want to register and let's us
   run this code not as the component gets rendered but after it has already been painted onto the screen*/
@@ -67,13 +69,30 @@ export default function App() {
 
   useEffect(function () {
     async function fetchMovies() {
-      const res = await fetch(
-        `http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      // at this point the state will still be stale
-      /* console.log(movies); */
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
+        );
+
+        if (!res.ok)
+          throw new Error("Something went wrong with fetching movies");
+
+        const data = await res.json();
+
+        if (data.Response === "False") throw new Error(data.Error);
+
+        setMovies(data.Search);
+        console.log(data);
+        // at this point the state will still be stale
+        /* console.log(movies); */
+      } catch (err) {
+        console.log(err.message);
+        setError(err.message);
+      } finally {
+        // finally will always run when a promise is settled whether fulfilled or rejected
+        setIsLoading(false);
+      }
     }
 
     fetchMovies();
@@ -96,7 +115,10 @@ export default function App() {
       </NavBar>
       <Main>
         <Box>
-          <MovieList movies={movies} />
+          {/*error ? error : isLoading ? <Loader /> : <MovieList movies={movies} />*/}
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
         </Box>
         <Box>
           <WatchedSummary watched={watched} />
@@ -104,6 +126,19 @@ export default function App() {
         </Box>
       </Main>
     </>
+  );
+}
+
+function Loader() {
+  return <p className="loader">Loading...</p>;
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>⛔️</span>
+      {message}
+    </p>
   );
 }
 
