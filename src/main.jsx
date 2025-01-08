@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 
-import StarRating from "./StarRating.jsx";
+import StarRating from "./components/StarRating.jsx";
 
 function Test() {
   /* instead of lifting the rating state, we passed the setMovieRating function in as a prop and have the child component update
