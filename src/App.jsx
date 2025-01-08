@@ -56,8 +56,39 @@ export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState("inception");
   const [error, setError] = useState("");
-  const query = "gdfgs ";
+  const tempQuery = "interstellar";
+  /* the following console.logs will print in the following order
+  
+  C will print first as effects come after a browser paint but render logic occurs during render.
+  A and D will print next in this order simply because A appears first in the code
+
+  if I were to clear the console and type a letter into the search box
+  C will appear followed by B, A does not print. C will get logged because of a re-render
+  B will get logged because its effect has no dependency array, which means the effect will be synchronized with everything
+  A does not print because it's dependency array is blank, it has no dependecies so it won't be ran 
+
+  adding in D now, D will print any time the query state is updated
+
+  // After initial render
+  useEffect(function () {
+    console.log("A");
+  }, []);
+
+  // After every render
+  useEffect(function () {
+    console.log("B");
+  });
+
+  // During Render
+  console.log("C");
+
+  // After query state has an update
+  useEffect(() => {
+    console.log("D");
+  }, [query]);
+  */
 
   /* use effect is used to register an effect, it contains the side effect we want to register and let's us
   run this code not as the component gets rendered but after it has already been painted onto the screen*/
@@ -67,36 +98,46 @@ export default function App() {
       .then((data) => setMovies(data.Search));
   }, []);*/
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
-        );
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true);
+          setError("");
+          const res = await fetch(
+            `http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
+          );
 
-        if (!res.ok)
-          throw new Error("Something went wrong with fetching movies");
+          if (!res.ok)
+            throw new Error("Something went wrong with fetching movies");
 
-        const data = await res.json();
+          const data = await res.json();
 
-        if (data.Response === "False") throw new Error(data.Error);
+          if (data.Response === "False") throw new Error("Movie not found");
 
-        setMovies(data.Search);
-        console.log(data);
-        // at this point the state will still be stale
-        /* console.log(movies); */
-      } catch (err) {
-        console.log(err.message);
-        setError(err.message);
-      } finally {
-        // finally will always run when a promise is settled whether fulfilled or rejected
-        setIsLoading(false);
+          setMovies(data.Search);
+          // at this point the state will still be stale
+          /* console.log(movies); */
+        } catch (err) {
+          console.log(err.message);
+          setError(err.message);
+        } finally {
+          // finally will always run when a promise is settled whether fulfilled or rejected
+          setIsLoading(false);
+        }
       }
-    }
 
-    fetchMovies();
-  }, []);
+      // If we have less than 3 characters in the search bar we don't want to perform the fetch
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+      fetchMovies();
+    },
+    // the effect will react when this state updates
+    [query]
+  );
 
   /* we never want to set state inside of a components render logic, this is an infinite loop of state setting
   where the component will keep re-rendering
@@ -110,7 +151,7 @@ export default function App() {
   return (
     <>
       <NavBar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
       <Main>
@@ -136,7 +177,7 @@ function Loader() {
 function ErrorMessage({ message }) {
   return (
     <p className="error">
-      <span>⛔️</span>
+      <span>⛔️ </span>
       {message}
     </p>
   );
@@ -163,15 +204,12 @@ function Logo() {
 function NumResults({ movies }) {
   return (
     <p className="num-results">
-      Found <strong>{movies.length}</strong> results
+      Found <strong>{movies?.length}</strong> results
     </p>
   );
 }
 
-// Example of a stateful component
-function Search() {
-  const [query, setQuery] = useState("");
-
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
