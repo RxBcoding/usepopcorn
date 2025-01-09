@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { KEY } from "../App";
 import { Loader } from "./Loader";
 import StarRating from "./StarRating";
+import { func } from "prop-types";
 
 export function MovieDetails({
   selectedId,
@@ -62,6 +63,29 @@ export function MovieDetails({
     },
     /* This effect needs to be performed whenever the selectedId state has a change*/
     [selectedId]
+  );
+
+  useEffect(
+    function updateTitle() {
+      if (!title) return;
+      document.title = `Movie | ${title}`;
+
+      /* After closing a movie, this side effect will still be occuring, this is a usecase for when I may 
+      want to use the clean up function
+      
+      The cleanUp function, despite running after the component has unmounted, still knows what the title is.
+      This is because of closure in JS. title was already created by the time the effect was first created.
+      So even after the component has already unmounted, the useEFfect function has already closed over the title variable
+      thus allowing cleanUp to still access it
+
+      When switching to a different movie, React will cleanUp from the previous movie
+      */
+      return function cleanUp() {
+        document.title = "usePopcorn";
+        console.log(`Clean up effect for movie ${title}`);
+      };
+    },
+    [title]
   );
 
   return (
