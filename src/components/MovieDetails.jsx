@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { KEY } from "../App";
 import { Loader } from "./Loader";
 import StarRating from "./StarRating";
-import { func } from "prop-types";
 
 export function MovieDetails({
   selectedId,

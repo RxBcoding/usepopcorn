@@ -10,9 +10,6 @@ import { NumResults } from "./components/NumResults";
 import { NavBar } from "./components/NavBar";
 import { ErrorMessage } from "./components/ErrorMessage";
 
-export const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
-
 export const KEY = "d826a939";
 
 export default function App() {
@@ -117,7 +114,15 @@ export default function App() {
         setError("");
         return;
       }
-      fetchMovies();
+
+      /* use Debouncing to wait 500ms after the user has typed before fetching movies
+      this allowsd the user enough time to type in fully the movie they are looking for
+      without doing a fetch on every letter that is typed leading to unnecessary API calls*/
+      const timer = setTimeout(fetchMovies, 500);
+
+      return function () {
+        clearTimeout(timer);
+      };
     },
     // the effect will react when this state updates
     [query]
