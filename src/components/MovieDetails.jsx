@@ -47,6 +47,25 @@ export function MovieDetails({
 
   useEffect(
     function () {
+      function keydownEscape(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
+
+      document.addEventListener("keydown", keydownEscape);
+      return function () {
+        /* We want to remove the event listener on every close otherwise they will keep piling up
+        with every new movie we open. We also don't want the keydown event active when we are on the home page so we need to 
+        remove it for that reason as well.*/
+        document.removeEventListener("keydown", keydownEscape);
+      };
+    },
+    [onCloseMovie]
+  );
+
+  useEffect(
+    function () {
       async function getMovieDetails() {
         setIsLoading(true);
         const res = await fetch(
@@ -81,7 +100,7 @@ export function MovieDetails({
       */
       return function cleanUp() {
         document.title = "usePopcorn";
-        console.log(`Clean up effect for movie ${title}`);
+        //console.log(`Clean up effect for movie ${title}`);
       };
     },
     [title]

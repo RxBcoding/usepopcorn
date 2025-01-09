@@ -79,6 +79,9 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
+  /* in the end, upon initial render we are no longer fetching any data. We only fetch data know when searching for movies meaning this entire 
+  useEffect could actually just be an event handler now, which is the preffered method for handling side effects. This project was meant to help me preactice and 
+  understand the useEffect hook though so I will leave this as is. There are applications that want to data fetch on mount*/
   useEffect(
     function () {
       async function fetchMovies() {
@@ -118,6 +121,7 @@ export default function App() {
       /* use Debouncing to wait 500ms after the user has typed before fetching movies
       this allowsd the user enough time to type in fully the movie they are looking for
       without doing a fetch on every letter that is typed leading to unnecessary API calls*/
+      handleCloseMovie();
       const timer = setTimeout(fetchMovies, 500);
 
       return function () {
