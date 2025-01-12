@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { KEY } from "../App";
 import { Loader } from "./Loader";
 import StarRating from "./StarRating";
@@ -12,6 +12,23 @@ export function MovieDetails({
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
+
+  /* using ref to persist data across renders
+  let count = 0 would not work because through every rerender, the count would be reset this way. With a ref react knows not to reset it
+  the ref will be updated with an effect that will run whenever the userRating is updated (when ever the user clicks a new rating) this way we can tell how many times a 
+  user clicked on different ratings before finally adding it to their watchlist
+  
+  notice that when ref is updated it does NOT trigger a rerender which is why we normally don't put
+  refs in JSX output
+  
+  variables are not persistent and do not trigger rerenders
+  refs are persistent and do not trigger rerenders
+  states are persistent and trigger rerenders*/
+  const countRef = useRef(0);
+
+  useEffect(() => {
+    if (userRating) countRef.current++;
+  }, [userRating]);
 
   const isWatched = watched.find((movie) => movie.imdbID === selectedId);
   const watchedUserRating = isWatched?.userRating;
@@ -38,6 +55,7 @@ export function MovieDetails({
       imdbRating: Number(imdbRating),
       runtime: runtime.split(" ").at(0),
       userRating,
+      countRatingDecisions: countRef.current,
     };
 
     onAddWatched(newWatchedMovie);
